@@ -41,10 +41,10 @@
       value: function render() {
         return React.createElement(
           "thead",
-          null,
+          { ref: "thead" },
           React.createElement(
             "tr",
-            null,
+            { ref: "tr" },
             this.props.columns.map(function (col) {
               return React.createElement(
                 "td",
@@ -59,6 +59,25 @@
 
     return MegaGridHeader;
   })(React.Component);
+
+  var MegaGridFixedHeader = (function (_MegaGridHeader) {
+    _inherits(MegaGridFixedHeader, _MegaGridHeader);
+
+    function MegaGridFixedHeader() {
+      _classCallCheck(this, MegaGridFixedHeader);
+
+      _get(Object.getPrototypeOf(MegaGridFixedHeader.prototype), "constructor", this).apply(this, arguments);
+    }
+
+    _createClass(MegaGridFixedHeader, [{
+      key: "onRedraw",
+      value: function onRedraw(e) {
+        console.log('hit child onscroll');
+      }
+    }]);
+
+    return MegaGridFixedHeader;
+  })(MegaGridHeader);
 
   var MegaGridElement = (function (_React$Component2) {
     _inherits(MegaGridElement, _React$Component2);
@@ -75,11 +94,7 @@
         return React.createElement(
           "tr",
           _extends({ className: "megagrid-element" }, this.props),
-          React.createElement(
-            "td",
-            null,
-            this.props.children
-          )
+          this.props.children
         );
       }
     }]);
@@ -112,7 +127,6 @@
           rows.push(React.createElement(this.props.element, props, this.props.data[i]));
           n++;
         }
-        console.log(rows);
         var tbodyProps = { className: 'megagrid-tbody' };
         return React.createElement("tbody", tbodyProps, rows);
       }
@@ -144,6 +158,7 @@
       _classCallCheck(this, MegaGrid);
 
       _get(Object.getPrototypeOf(MegaGrid.prototype), "constructor", this).call(this, props);
+      this.childRefs = {};
       this.state = {
         columns: this.props.columns,
         spacerDimensions: { topSpacer: 0, bottomSpacer: 0 },
@@ -196,6 +211,10 @@
         dims.gridAndHeaderHeight = dims.gridHeight + this.props.rowHeight;
         dims.virtualGridHeight = dims.visibleRowCount * this.props.rowHeight;
         var spacerDimensions = this.calcSpacerDimensions(dims);
+
+        var header = this.getHeader();
+        if (header && header.onRedraw) this.header.onRedraw(dims);
+
         this.setState({ rowDimensions: rowDimensions, spacerDimensions: spacerDimensions });
       }
     }, {
@@ -220,8 +239,27 @@
         return { topSpacer: topSpacer, bottomSpacer: bottomSpacer };
       }
     }, {
+      key: "getChildRef",
+      value: function getChildRef(ref) {
+        var self = this;
+        if (self.childRefs[ref] || self.childRefs[ref] === null) return self.childRefs[ref];
+        React.Children.forEach(this.props.children, function (c) {
+          if (c.ref && c.ref === ref) {
+            self.childRefs[ref] = c;
+          }
+        });
+        if (!self.childRefs[ref]) self.childRefs[ref] = null;
+        return self.childRefs[ref];
+      }
+    }, {
+      key: "getHeader",
+      value: function getHeader() {
+        return this.getChildRef('header');
+      }
+    }, {
       key: "render",
       value: function render() {
+        console.log(this.props.children);
         // TODO _.extend from this.props.style ?
         var scrollStyles = {
           overflowY: 'scroll'
@@ -237,8 +275,7 @@
           height: this.state.spacerDimensions.bottomSpacer
         };
 
-        var header = this.props.headerElement ? React.createElement(this.props.headerElement, { columns: this.props.columns, dimensions: this.state.dimensions }) : "";
-
+        var header = this.getHeader() ? this.getHeader() : '';
         return React.createElement(
           "div",
           { ref: "scrollFrame", className: "megagrid-scrollframe", style: scrollStyles },
@@ -288,7 +325,12 @@
       testColumns.push("Header " + j);
     }
     var styles = { height: 500 };
-    var elem = React.createElement(MegaGrid, { rowHeight: "20", data: testGrid, columns: testColumns, style: styles });
+    var elem = React.createElement(
+      MegaGrid,
+      { rowHeight: "20", data: testGrid, columns: testColumns, style: styles },
+      React.createElement(MegaGridHeader, { ref: "header", columns: testColumns })
+    );
+
     var parent = document.querySelector('.grid');
     React.render(elem, parent, function () {
       console.log('rendered');
