@@ -1,0 +1,8 @@
+node_modules/
+.projectile
+*.swp
+*.bcp
+*.log
+*~
+.tern*
+.settings
