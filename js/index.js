@@ -19,24 +19,25 @@
 
   var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-  var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
   var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+  var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
   var MegaGridHeader = (function (_React$Component) {
+    _inherits(MegaGridHeader, _React$Component);
+
     function MegaGridHeader() {
       _classCallCheck(this, MegaGridHeader);
 
-      if (_React$Component != null) {
-        _React$Component.apply(this, arguments);
-      }
+      _get(Object.getPrototypeOf(MegaGridHeader.prototype), "constructor", this).call(this, constructor);
+      this.state = {
+        theadStyles: {}
+      };
     }
-
-    _inherits(MegaGridHeader, _React$Component);
 
     _createClass(MegaGridHeader, [{
       key: "render",
@@ -44,7 +45,7 @@
         var i = 0;
         return React.createElement(
           "thead",
-          { ref: "thead" },
+          { ref: "thead", className: "megagrid-thead", style: this.state.theadStyles },
           React.createElement(
             "tr",
             { ref: "tr" },
@@ -65,37 +66,45 @@
     return MegaGridHeader;
   })(React.Component);
 
+  exports.MegaGridHeader = MegaGridHeader;
+
   var MegaGridFixedHeader = (function (_MegaGridHeader) {
+    _inherits(MegaGridFixedHeader, _MegaGridHeader);
+
     function MegaGridFixedHeader() {
       _classCallCheck(this, MegaGridFixedHeader);
 
-      if (_MegaGridHeader != null) {
-        _MegaGridHeader.apply(this, arguments);
-      }
+      _get(Object.getPrototypeOf(MegaGridFixedHeader.prototype), "constructor", this).apply(this, arguments);
     }
-
-    _inherits(MegaGridFixedHeader, _MegaGridHeader);
 
     _createClass(MegaGridFixedHeader, [{
       key: "onParentRedraw",
-      value: function onParentRedraw(e) {
-        console.log("hit child onparentredraw");
+      value: function onParentRedraw(dims) {
+        var theadStyles = {
+          transform: "translateY(" + dims.tableScrollTop + "px)"
+        };
+        theadStyles['msTransform'] = theadStyles.transform;
+        theadStyles['WebkitTransform'] = theadStyles.transform;
+        theadStyles['MozTransform'] = theadStyles.transform;
+        theadStyles['OTransform'] = theadStyles.transform;
+
+        this.setState({ theadStyles: theadStyles });
       }
     }]);
 
     return MegaGridFixedHeader;
   })(MegaGridHeader);
 
+  exports.MegaGridFixedHeader = MegaGridFixedHeader;
+
   var MegaGridElement = (function (_React$Component2) {
+    _inherits(MegaGridElement, _React$Component2);
+
     function MegaGridElement() {
       _classCallCheck(this, MegaGridElement);
 
-      if (_React$Component2 != null) {
-        _React$Component2.apply(this, arguments);
-      }
+      _get(Object.getPrototypeOf(MegaGridElement.prototype), "constructor", this).apply(this, arguments);
     }
-
-    _inherits(MegaGridElement, _React$Component2);
 
     _createClass(MegaGridElement, [{
       key: "render",
@@ -112,15 +121,13 @@
   })(React.Component);
 
   var MegaGridRows = (function (_React$Component3) {
+    _inherits(MegaGridRows, _React$Component3);
+
     function MegaGridRows() {
       _classCallCheck(this, MegaGridRows);
 
-      if (_React$Component3 != null) {
-        _React$Component3.apply(this, arguments);
-      }
+      _get(Object.getPrototypeOf(MegaGridRows.prototype), "constructor", this).apply(this, arguments);
     }
-
-    _inherits(MegaGridRows, _React$Component3);
 
     _createClass(MegaGridRows, [{
       key: "render",
@@ -138,7 +145,7 @@
           rows.push(React.createElement(this.props.element, props, this.props.data[i]));
           n++;
         }
-        var tbodyProps = { className: "megagrid-tbody" };
+        var tbodyProps = { className: 'megagrid-tbody' };
         return React.createElement("tbody", tbodyProps, rows);
       }
     }]);
@@ -163,19 +170,19 @@
    */
 
   var MegaGrid = (function (_React$Component4) {
+    _inherits(MegaGrid, _React$Component4);
+
     function MegaGrid(props) {
       _classCallCheck(this, MegaGrid);
 
       _get(Object.getPrototypeOf(MegaGrid.prototype), "constructor", this).call(this, props);
-      this.childHandlers = {};
+
       this.state = {
         columns: this.props.columns,
         spacerDimensions: { topSpacer: 0, bottomSpacer: 0 },
         rowDimensions: {}
       };
     }
-
-    _inherits(MegaGrid, _React$Component4);
 
     _createClass(MegaGrid, [{
       key: "componentDidMount",
@@ -184,15 +191,14 @@
         var scrollFrame = this.refs.scrollFrame.getDOMNode();
         this.onScrollBound = this.onScroll.bind(this);
         this.onResizeBound = this.onResize.bind(this);
-        scrollFrame.addEventListener("scroll", this.onScrollBound);
-        scrollFrame.addEventListener("resize", this.onResizeBound);
-        this.bindChildHandler("onParentRedraw");
+        scrollFrame.addEventListener('scroll', this.onScrollBound);
+        scrollFrame.addEventListener('resize', this.onResizeBound);
       }
     }, {
       key: "componentWillUnmount",
       value: function componentWillUnmount() {
-        scrollFrame.removeEventListener("scroll", this.onScrollBound);
-        scrollFrame.removeEventListener("resize", this.onResizeBound);
+        scrollFrame.removeEventListener('scroll', this.onScrollBound);
+        scrollFrame.removeEventListener('resize', this.onResizeBound);
       }
     }, {
       key: "onScroll",
@@ -214,18 +220,24 @@
         if (dims.scrollTop < 0) dims.scrollTop = -dims.scrollTop;
         var scrollRect = scrollFrame.getBoundingClientRect();
         dims.scrollHeight = scrollRect.bottom - scrollRect.top;
-        dims.gridHeight = this.props.rowHeight * this.props.data.length;
+        var rowHeight = parseInt(this.props.rowHeight);
+        dims.gridHeight = rowHeight * this.props.data.length;
         // for now assume header height == row height
-        dims.headerHeight = this.props.rowHeight;
+        dims.headerHeight = rowHeight;
 
         var rowDimensions = this.calcVisibleRows(dims);
         for (var d in rowDimensions) dims[d] = rowDimensions[d];
-        dims.gridAndHeaderHeight = dims.gridHeight + this.props.rowHeight;
-        dims.virtualGridHeight = dims.visibleRowCount * this.props.rowHeight;
+        dims.gridAndHeaderHeight = dims.gridHeight + rowHeight;
+        dims.virtualGridHeight = dims.visibleRowCount * rowHeight;
         var spacerDimensions = this.calcSpacerDimensions(dims);
+        for (var d in spacerDimensions) dims[d] = spacerDimensions[d];
+
+        dims.tableScrollTop = dims.scrollTop - dims.topSpacer;
 
         this.setState({ rowDimensions: rowDimensions, spacerDimensions: spacerDimensions });
-        this.applyChildHandler("onParentRedraw", [dims]);
+        if (this.refs.header && this.refs.header.onParentRedraw) {
+          this.refs.header.onParentRedraw(dims);
+        }
       }
     }, {
       key: "calcVisibleRows",
@@ -249,35 +261,11 @@
         return { topSpacer: topSpacer, bottomSpacer: bottomSpacer };
       }
     }, {
-      key: "bindChildHandler",
-      value: function bindChildHandler(method, args) {
-        var self = this;
-        if (!self.childHandlers[method]) self.childHandlers[method] = [];
-        React.Children.forEach(this.props.children, function (c) {
-          if (c[method] && typeof c[method] == "function") {
-            self.childHandlers[method].push(c[method].bind(c));
-          }
-        });
-      }
-    }, {
-      key: "unbindChildHandlers",
-      value: function unbindChildHandlers() {
-        this.childHandlers = {};
-      }
-    }, {
-      key: "applyChildHandler",
-      value: function applyChildHandler(method, args) {
-        var handlers = this.childHandlers[method] || [];
-        handlers.forEach(function (m) {
-          m.apply(m, args);
-        });
-      }
-    }, {
       key: "render",
       value: function render() {
         // TODO _.extend from this.props.style ?
         var scrollStyles = {
-          overflowY: "scroll"
+          overflowY: 'scroll'
         };
         for (var p in this.props.style || {}) {
           scrollStyles[p] = this.props.style[p];
@@ -289,6 +277,8 @@
         var bottomSpacerStyle = {
           height: this.state.spacerDimensions.bottomSpacer
         };
+        var headerProps = { ref: 'header' };
+        for (var p in this.props) headerProps[p] = this.props[p];
 
         return React.createElement(
           "div",
@@ -297,6 +287,7 @@
           React.createElement(
             "table",
             { ref: "table", className: "megagrid-table" },
+            React.createElement(this.props.headerElement, headerProps),
             React.createElement(MegaGridRows, { data: this.props.data, dimensions: this.state.rowDimensions, element: this.props.rowElement })
           ),
           React.createElement("div", { ref: "bottomSpacer", style: bottomSpacerStyle })
@@ -313,7 +304,7 @@
     rowHeight: 20,
     rowBuffer: 10,
     rowElement: MegaGridElement, // override this for custom element rendering
-    headerElement: MegaGridHeader, // ditto for custom header
+    headerElement: MegaGridFixedHeader, // ditto for custom header
     fixedHeader: true,
     data: [],
     columns: []
@@ -344,9 +335,9 @@
       React.createElement(MegaGridFixedHeader, { columns: testColumns })
     );
 
-    var parent = document.querySelector(".grid");
+    var parent = document.querySelector('.grid');
     React.render(elem, parent, function () {
-      console.log("rendered");
+      console.log('rendered');
     });
   };
 });
