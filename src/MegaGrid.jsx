@@ -2,14 +2,14 @@ export class MegaGridHeader extends React.Component {
   constructor(){
     super(constructor);
     this.state = {
-      theadStyles: {
+      style: {
       },
     }
   }
   render() {
     var i = 0;
     return (
-      <thead ref="thead" className="megagrid-thead" style={this.state.theadStyles} >
+      <thead ref="thead" className="megagrid-thead" {...this.state}>
         <tr ref="tr">
           {
             this.props.columns.map(function(col){
@@ -26,25 +26,27 @@ export class MegaGridHeader extends React.Component {
 
 export class MegaGridFixedHeader extends MegaGridHeader {
   onParentRedraw(dims){
-    var theadStyles = {
-      transform: "translateY(" + dims.tableScrollTop + "px)"
+    var theadStyles = {};
+    if (this.props.style){
+      for (var p in this.props.style) theadStyles[p] = this.props.style[p];
     }
+    theadStyles.transform = "translateY(" + dims.tableScrollTop + "px)";
     theadStyles['msTransform'] = theadStyles.transform;
     theadStyles['WebkitTransform'] = theadStyles.transform;
     theadStyles['MozTransform'] = theadStyles.transform;
     theadStyles['OTransform'] = theadStyles.transform;
 
-    this.setState({theadStyles: theadStyles });
+    this.setState({style: theadStyles });
   }
 }
 
-class MegaGridElement extends React.Component {
+export class MegaGridElement extends React.Component {
   render(){
     return <tr className="megagrid-element" {...this.props}>{this.props.children}</tr>
   }
 }
 
-class MegaGridRows extends React.Component {
+export class MegaGridRows extends React.Component {
   render() {
     var rows = [],
         min = Math.min(this.props.dimensions.firstVisibleRow, this.props.data.length),
@@ -92,7 +94,7 @@ export class MegaGrid extends React.Component {
   }
 
   componentDidMount(){
-    this.calculateDimensions();
+    var self = this;
     var scrollFrame = this.refs.scrollFrame.getDOMNode();
     this.onScrollBound = this.onScroll.bind(this);
     this.onResizeBound = this.onResize.bind(this);
@@ -106,30 +108,30 @@ export class MegaGrid extends React.Component {
   }
 
   onScroll(e){
-    this.calculateDimensions();
+    this.calculateDimensions(this.props);
   }
 
   onResize(e){
-    this.calculateDimensions();
+    this.calculateDimensions(this.props);
   }
 
-  calculateDimensions(){ // TODO clean this up
+  calculateDimensions(props){ // TODO clean this up
     var scrollFrame = this.refs.scrollFrame.getDOMNode();
     var dims = {};
     dims.scrollTop = scrollFrame.scrollTop;
     if (dims.scrollTop < 0) dims.scrollTop = -dims.scrollTop;
     var scrollRect = scrollFrame.getBoundingClientRect();
     dims.scrollHeight = scrollRect.bottom - scrollRect.top;
-    var rowHeight = parseInt(this.props.rowHeight);
-    dims.gridHeight = rowHeight * this.props.data.length;
+    var rowHeight = parseInt(props.rowHeight || this.props.rowHeight);
+    dims.gridHeight = rowHeight * (props.data.length || this.props.data.length || 0);
     // for now assume header height == row height
     dims.headerHeight = rowHeight;
 
-    var rowDimensions = this.calcVisibleRows(dims);
+    var rowDimensions = this.calcVisibleRows(props, dims);
     for (var d in rowDimensions) dims[d] = rowDimensions[d];
     dims.gridAndHeaderHeight = dims.gridHeight + rowHeight;
     dims.virtualGridHeight = dims.visibleRowCount * rowHeight;
-    var spacerDimensions = this.calcSpacerDimensions(dims);
+    var spacerDimensions = this.calcSpacerDimensions(props, dims);
     for (var d in spacerDimensions) dims[d] = spacerDimensions[d];
 
     dims.tableScrollTop = dims.scrollTop - dims.topSpacer;
@@ -140,23 +142,27 @@ export class MegaGrid extends React.Component {
     }
   }
 
-  calcVisibleRows(dims){
-    var firstVisibleRow = Math.floor((dims.scrollTop - dims.headerHeight) / this.props.rowHeight);
-    firstVisibleRow -= this.props.rowBuffer;
+  calcVisibleRows(props, dims){
+    var firstVisibleRow = Math.floor((dims.scrollTop - dims.headerHeight) / props.rowHeight);
+    firstVisibleRow -= parseInt(props.rowBuffer || this.props.rowBuffer);
     firstVisibleRow = Math.max(0, firstVisibleRow);
-    var lastVisibleRow = Math.floor((dims.scrollTop - dims.headerHeight + dims.scrollHeight) / this.props.rowHeight);
-    lastVisibleRow += this.props.rowBuffer;
-    lastVisibleRow = Math.max(0, Math.min(lastVisibleRow, this.props.data.length));
+    var lastVisibleRow = Math.floor((dims.scrollTop - dims.headerHeight + dims.scrollHeight) / (props.rowHeight || this.props.rowHeight));
+    lastVisibleRow += parseInt(props.rowBuffer || this.props.rowBuffer);
+    lastVisibleRow = Math.max(0, Math.min(lastVisibleRow, ((props.data && props.data.length) || (this.props.data.length))));
     var visibleRowCount = lastVisibleRow - firstVisibleRow;
     return {firstVisibleRow: firstVisibleRow, lastVisibleRow: lastVisibleRow, visibleRowCount: visibleRowCount };
   }
 
-  calcSpacerDimensions(dims){
-    var topSpacer = (dims.firstVisibleRow - 1) * this.props.rowHeight; // + header?
+  calcSpacerDimensions(props, dims){
+    var topSpacer = (dims.firstVisibleRow - 1) * (props.rowHeight || this.props.rowHeight); // + header?
     var bottomSpacer = dims.gridHeight - dims.virtualGridHeight - topSpacer; // - header?
     topSpacer = Math.max(topSpacer, 0);
     bottomSpacer = Math.max(bottomSpacer, 0);
     return {topSpacer: topSpacer, bottomSpacer: bottomSpacer }
+  }
+
+  componentWillReceiveProps(nextProps){
+    this.calculateDimensions(nextProps);
   }
 
   render(){
@@ -164,8 +170,12 @@ export class MegaGrid extends React.Component {
     var scrollStyles = {
       overflowY: 'scroll'
     }
+    // TODO choose one?
     for (var p in (this.props.style || {})){
       scrollStyles[p] = this.props.style[p];
+    }
+    for (var p in (this.state.style || {})){
+      scrollStyles[p] = this.state.style[p];
     }
 
     var topSpacerStyle = {
@@ -180,7 +190,8 @@ export class MegaGrid extends React.Component {
     return (
       <div ref="scrollFrame" className="megagrid-scrollframe" style={ scrollStyles }>
         <div ref="topSpacer" style={ topSpacerStyle } />
-          <table ref="table" className="megagrid-table">
+          { this.props.children }
+          <table ref="table" className="megagrid-table" {...this.props.tableProps}>
             { React.createElement(this.props.headerElement, headerProps) }
             <MegaGridRows data={ this.props.data } dimensions={ this.state.rowDimensions } element={ this.props.rowElement } />
           </table>
@@ -190,11 +201,13 @@ export class MegaGrid extends React.Component {
   }
 }
 
+
 MegaGrid.defaultProps = {
   rowHeight: 20,
   rowBuffer: 10,
   rowElement: MegaGridElement, // override this for custom element rendering
   headerElement: MegaGridFixedHeader, // ditto for custom header
+  tableProps: {},
   fixedHeader: true,
   data: [],
   columns: []
